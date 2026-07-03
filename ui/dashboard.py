@@ -7,7 +7,7 @@ from ui.header import Header
 from ui.stats_cards import StatsCards
 from ui.business_table import BusinessTable
 from services.export_service import export_to_excel
-
+from database.database import save_business, get_all_businesses
 
 def create_app():
     # -----------------------------
@@ -103,6 +103,14 @@ def create_app():
                 return
 
             for company, website in businesses:
+
+                save_business(
+                    company,
+                    website,
+                    country_text,
+                    "New"
+                )
+
                 table.add_row(
                     company,
                     website,
@@ -137,6 +145,30 @@ def create_app():
             f"Excel file saved successfully!\n\n{filename}"
         )
 
+    def load_saved_leads():
+
+        table.clear()
+
+        businesses = get_all_businesses()
+
+        print("Businesses loaded:", businesses)
+
+        if len(businesses) == 0:
+            messagebox.showinfo(
+               "Saved Leads",
+               "No saved leads found."
+            )
+            return
+
+        for company, website, country, status in businesses:
+           print(company)
+
+           table.add_row(
+               company,
+               website,
+               country,
+               status
+            )
     # -----------------------------
     # Buttons
     # -----------------------------
@@ -153,5 +185,13 @@ def create_app():
         command=export_excel
     )
     export_btn.pack(side="left", padx=10)
+
+    saved_btn = ctk.CTkButton(
+         search_frame,
+         text="📂 Saved Leads",
+         command=load_saved_leads
+    )
+
+    saved_btn.pack(side="left", padx=10)
 
     return app
