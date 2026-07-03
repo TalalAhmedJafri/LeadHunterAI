@@ -9,6 +9,8 @@ LeadHunter AI is a desktop application built with Python and CustomTkinter that 
 - Export to Excel
 - Modern desktop interface
 - AI-ready architecture
+- SQLite database
+- Modern CustomTkinter UI
 
 ## Technologies
 
@@ -22,6 +24,12 @@ LeadHunter AI is a desktop application built with Python and CustomTkinter that 
 ## Screenshot
 
 (Coming Soon)
+
+## Future Features
+
+- AI Email Generator
+- Instagram Finder
+- CRM Dashboard
 
 ## Author
 

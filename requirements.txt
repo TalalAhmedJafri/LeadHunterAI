@@ -1,4 +1,6 @@
 customtkinter
-openpyxl
 requests
+beautifulsoup4
+duckduckgo-search
+openpyxl
 pandas

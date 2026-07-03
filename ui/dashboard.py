@@ -1,123 +1,140 @@
-from ui.business_table import BusinessTable
-from services.lead_finder import search_businesses
 import customtkinter as ctk
+
+from controllers.lead_controller import LeadController
+from ui.sidebar import Sidebar
+from ui.header import Header
+from ui.stats_cards import StatsCards
+from ui.business_table import BusinessTable
 
 
 def create_app():
-    # -----------------------
-    # Window Configuration
-    # -----------------------
+    # -----------------------------
+    # Window
+    # -----------------------------
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("blue")
 
     app = ctk.CTk()
     app.title("LeadHunter AI")
-    app.geometry("1200x700")
+    app.geometry("1400x800")
 
-    # -----------------------
+    # -----------------------------
     # Sidebar
-    # -----------------------
-    sidebar = ctk.CTkFrame(app, width=220, corner_radius=0)
+    # -----------------------------
+    sidebar = Sidebar(app)
     sidebar.pack(side="left", fill="y")
 
-    logo = ctk.CTkLabel(
-        sidebar,
-        text="LeadHunter AI",
-        font=("Segoe UI", 22, "bold")
-    )
-    logo.pack(pady=30)
-
-    buttons = [
-        "🏠 Dashboard",
-        "🔍 Find Leads",
-        "📧 Outreach",
-        "📊 Analytics",
-        "⚙️ Settings"
-    ]
-
-    for text in buttons:
-        btn = ctk.CTkButton(
-            sidebar,
-            text=text,
-            width=180,
-            height=40
-        )
-        btn.pack(pady=8)
-
-    # -----------------------
+    # -----------------------------
     # Main Area
-    # -----------------------
+    # -----------------------------
     main = ctk.CTkFrame(app)
-    main.pack(side="right", fill="both", expand=True, padx=20, pady=20)
+    main.pack(side="right", fill="both", expand=True)
 
-    title = ctk.CTkLabel(
-        main,
-        text="Dashboard",
-        font=("Segoe UI", 30, "bold")
-    )
-    title.pack(anchor="w", pady=(10, 20))
+    # -----------------------------
+    # Header
+    # -----------------------------
+    header = Header(main)
+    header.pack(fill="x", padx=20, pady=(20, 10))
 
-    # -----------------------
-    # Search Section
-    # -----------------------
+    # -----------------------------
+    # Search Frame
+    # -----------------------------
     search_frame = ctk.CTkFrame(main)
-    search_frame.pack(fill="x", pady=10)
+    search_frame.pack(fill="x", padx=20, pady=10)
 
     keyword = ctk.CTkEntry(
         search_frame,
         placeholder_text="Enter business niche (e.g. Supplements)",
-        width=300
+        width=350
     )
-    keyword.pack(side="left", padx=10, pady=10)
+    keyword.pack(side="left", padx=10, pady=15)
 
     country = ctk.CTkOptionMenu(
         search_frame,
         values=["USA", "Canada", "UK", "Australia"]
     )
+    country.set("USA")
     country.pack(side="left", padx=10)
 
-    # -----------------------
-    # Business Table
-    # -----------------------
-    table = BusinessTable(main)
-    table.pack(fill="both", expand=True, pady=20)
+    # -----------------------------
+    # Stats
+    # -----------------------------
+    stats = StatsCards(main)
+    stats.pack(fill="x", padx=20, pady=10)
 
-    # -----------------------
+    # -----------------------------
+    # Business Table
+    # -----------------------------
+    table = BusinessTable(main)
+    table.pack(fill="both", expand=True, padx=20, pady=20)
+
+    # -----------------------------
     # Search Function
-    # -----------------------
+    # -----------------------------
     def find_businesses():
+        
+        print("Keyword:", keyword.get())
+        print("Country:", country.get())
+
+        table.clear()
+
         keyword_text = keyword.get().strip()
         country_text = country.get()
 
         if keyword_text == "":
-            return
-
-        data = search_businesses(keyword_text, country_text)
-
-        if not data:
-            return
-
-        # Create a fresh table every search
-        nonlocal table
-        table.destroy()
-
-        table = BusinessTable(main)
-        table.pack(fill="both", expand=True, pady=20)
-
-        for name, website in data:
             table.add_row(
-                company=name,
-                website=website,
-                country=country_text,
-                status="New"
+                "Please enter a keyword",
+                "-",
+                "-",
+                "-"
+            )
+            return
+
+        try:
+            businesses = LeadController.find(
+                keyword_text,
+                country_text
             )
 
-    # -----------------------
+            print("Businesses:", businesses)
+
+            if len(businesses) == 0:
+                table.add_row(
+                    "No businesses found",
+                    "-",
+                    country_text,
+                    "-"
+                )
+                return
+
+            for company, website in businesses:
+
+                print(company, website)
+
+                table.add_row(
+                    company,
+                    website,
+                    country_text,
+                    "New"
+                )
+
+        except Exception as e:
+
+            print(e)
+
+            table.add_row(
+                "ERROR",
+                str(e),
+                "",
+                ""
+            )
+
+    # -----------------------------
     # Search Button
-    # -----------------------
+    # -----------------------------
     search_btn = ctk.CTkButton(
         search_frame,
-        text="Find Businesses",
+        text="🔍 Find Businesses",
         command=find_businesses
     )
     search_btn.pack(side="left", padx=10)
