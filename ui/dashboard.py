@@ -1,3 +1,4 @@
+from ui.business_table import BusinessTable
 from services.lead_finder import search_businesses
 import customtkinter as ctk
 
@@ -76,40 +77,49 @@ def create_app():
     country.pack(side="left", padx=10)
 
     # -----------------------
-    # Results Box
+    # Business Table
     # -----------------------
-    results = ctk.CTkTextbox(main, height=400)
-    results.pack(fill="both", expand=True, pady=20)
+    table = BusinessTable(main)
+    table.pack(fill="both", expand=True, pady=20)
 
+    # -----------------------
+    # Search Function
+    # -----------------------
     def find_businesses():
-        results.delete("1.0", "end")
-
         keyword_text = keyword.get().strip()
         country_text = country.get()
+
+        if keyword_text == "":
+            return
 
         data = search_businesses(keyword_text, country_text)
 
         if not data:
-            results.insert("end", "No businesses found.")
             return
 
-        for i, (name, website) in enumerate(data, start=1):
-            results.insert(
-                "end",
-                f"{i}. {name}\nWebsite: {website}\n\n"
+        # Create a fresh table every search
+        nonlocal table
+        table.destroy()
+
+        table = BusinessTable(main)
+        table.pack(fill="both", expand=True, pady=20)
+
+        for name, website in data:
+            table.add_row(
+                company=name,
+                website=website,
+                country=country_text,
+                status="New"
             )
 
+    # -----------------------
+    # Search Button
+    # -----------------------
     search_btn = ctk.CTkButton(
         search_frame,
         text="Find Businesses",
         command=find_businesses
     )
     search_btn.pack(side="left", padx=10)
-
-    results.insert(
-        "end",
-        "Welcome to LeadHunter AI!\n\n"
-        "Type Supplements or Skincare and click Find Businesses."
-    )
 
     return app
