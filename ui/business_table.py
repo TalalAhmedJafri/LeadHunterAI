@@ -15,12 +15,20 @@ class BusinessTable(ctk.CTkFrame):
                 text=header,
                 font=("Segoe UI", 14, "bold")
             )
-            label.grid(row=0, column=col, padx=15, pady=10)
+            label.grid(
+                row=0,
+                column=col,
+                padx=15,
+                pady=10,
+                sticky="w"
+            )
 
     def clear(self):
+        # Remove all widgets
         for widget in self.winfo_children():
             widget.destroy()
 
+        # Recreate headers
         headers = ["Company", "Website", "Country", "Status"]
 
         for col, header in enumerate(headers):
@@ -29,7 +37,13 @@ class BusinessTable(ctk.CTkFrame):
                 text=header,
                 font=("Segoe UI", 14, "bold")
             )
-            label.grid(row=0, column=col, padx=15, pady=10)
+            label.grid(
+                row=0,
+                column=col,
+                padx=15,
+                pady=10,
+                sticky="w"
+            )
 
         self.current_row = 1
 
@@ -46,7 +60,26 @@ class BusinessTable(ctk.CTkFrame):
                 row=self.current_row,
                 column=col,
                 padx=15,
-                pady=5
+                pady=5,
+                sticky="w"
             )
 
         self.current_row += 1
+
+    def get_all_data(self):
+        data = []
+
+        for row in range(1, self.current_row):
+            values = []
+
+            for col in range(4):
+                widget = self.grid_slaves(row=row, column=col)
+
+                if widget:
+                    values.append(widget[0].cget("text"))
+                else:
+                    values.append("")
+
+            data.append(tuple(values))
+
+        return data

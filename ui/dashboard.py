@@ -1,10 +1,12 @@
 import customtkinter as ctk
+from tkinter import messagebox
 
 from controllers.lead_controller import LeadController
 from ui.sidebar import Sidebar
 from ui.header import Header
 from ui.stats_cards import StatsCards
 from ui.business_table import BusinessTable
+from services.export_service import export_to_excel
 
 
 def create_app():
@@ -37,7 +39,7 @@ def create_app():
     header.pack(fill="x", padx=20, pady=(20, 10))
 
     # -----------------------------
-    # Search Frame
+    # Search Area
     # -----------------------------
     search_frame = ctk.CTkFrame(main)
     search_frame.pack(fill="x", padx=20, pady=10)
@@ -57,7 +59,7 @@ def create_app():
     country.pack(side="left", padx=10)
 
     # -----------------------------
-    # Stats
+    # Statistics
     # -----------------------------
     stats = StatsCards(main)
     stats.pack(fill="x", padx=20, pady=10)
@@ -69,12 +71,9 @@ def create_app():
     table.pack(fill="both", expand=True, padx=20, pady=20)
 
     # -----------------------------
-    # Search Function
+    # Find Businesses
     # -----------------------------
     def find_businesses():
-        
-        print("Keyword:", keyword.get())
-        print("Country:", country.get())
 
         table.clear()
 
@@ -82,11 +81,9 @@ def create_app():
         country_text = country.get()
 
         if keyword_text == "":
-            table.add_row(
-                "Please enter a keyword",
-                "-",
-                "-",
-                "-"
+            messagebox.showwarning(
+                "Missing Keyword",
+                "Please enter a business niche."
             )
             return
 
@@ -96,9 +93,7 @@ def create_app():
                 country_text
             )
 
-            print("Businesses:", businesses)
-
-            if len(businesses) == 0:
+            if not businesses:
                 table.add_row(
                     "No businesses found",
                     "-",
@@ -108,9 +103,6 @@ def create_app():
                 return
 
             for company, website in businesses:
-
-                print(company, website)
-
                 table.add_row(
                     company,
                     website,
@@ -119,18 +111,34 @@ def create_app():
                 )
 
         except Exception as e:
-
-            print(e)
-
-            table.add_row(
-                "ERROR",
-                str(e),
-                "",
-                ""
+            messagebox.showerror(
+                "Error",
+                str(e)
             )
 
     # -----------------------------
-    # Search Button
+    # Export Excel
+    # -----------------------------
+    def export_excel():
+
+        data = table.get_all_data()
+
+        if len(data) == 0:
+            messagebox.showwarning(
+                "No Data",
+                "There is no data to export."
+            )
+            return
+
+        filename = export_to_excel(data)
+
+        messagebox.showinfo(
+            "Export Complete",
+            f"Excel file saved successfully!\n\n{filename}"
+        )
+
+    # -----------------------------
+    # Buttons
     # -----------------------------
     search_btn = ctk.CTkButton(
         search_frame,
@@ -138,5 +146,12 @@ def create_app():
         command=find_businesses
     )
     search_btn.pack(side="left", padx=10)
+
+    export_btn = ctk.CTkButton(
+        search_frame,
+        text="📤 Export Excel",
+        command=export_excel
+    )
+    export_btn.pack(side="left", padx=10)
 
     return app
